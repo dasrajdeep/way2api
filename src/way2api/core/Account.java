@@ -3,6 +3,7 @@ package way2api.core;
 /**
  * 
  * @author Rajdeep Das
+ * @version 1.0
  */
 public class Account {
     

@@ -12,6 +12,7 @@ import java.util.Scanner;
 /**
  * 
  * @author Rajdeep Das
+ * @version 1.0
  */
 public class ResponseHandler {
     
@@ -19,6 +20,13 @@ public class ResponseHandler {
     
     public ResponseHandler() {}
     
+    /**
+     * 
+     * @param hosturl String
+     * @param request List
+     * @param headersOnly Boolean
+     * @return List
+     */
     public List getResponse(String hosturl, List request, boolean headersOnly) {
         List response=new ArrayList<String>();
         
@@ -48,6 +56,11 @@ public class ResponseHandler {
     
     public List getLastResponse() {return this.lastResponse;}
     
+    /**
+     * 
+     * @param response List
+     * @return Boolean
+     */
     public boolean isRedirect(List response) {
         if(response.size()<3) return false;
         String header=(String)response.get(0);
@@ -55,6 +68,11 @@ public class ResponseHandler {
         else return false;
     }
     
+    /**
+     * 
+     * @param response List
+     * @return Boolean
+     */
     public boolean isPageNotFound(List response) {
         if(response.size()<3) return false;
         String header=(String)response.get(0);
@@ -62,6 +80,11 @@ public class ResponseHandler {
         else return false;
     }
     
+    /**
+     * 
+     * @param response List
+     * @return String
+     */
     public String getRedirectedLocation(List response) {
         String location=null;
         
@@ -76,6 +99,11 @@ public class ResponseHandler {
         return location;
     }
     
+    /**
+     * 
+     * @param response List
+     * @return String
+     */
     public String extractToken(List response) {
         String token=null;
         for(Iterator i=response.iterator();i.hasNext();) {
@@ -88,6 +116,11 @@ public class ResponseHandler {
         return token;
     }
     
+    /**
+     * 
+     * @param response List
+     * @return String
+     */
     public String extractCookie(List response) {
         String cookie=null;
         

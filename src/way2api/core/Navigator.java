@@ -1,14 +1,15 @@
 package way2api.core;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.Iterator;
 
 /**
  * 
  * @author Rajdeep Das
+ * @version 1.0
  */
 public class Navigator {
     
@@ -38,24 +39,46 @@ public class Navigator {
     
     public void setLoggedIn(boolean logged) {this.loggedIn=logged;}
     
+    /**
+     * 
+     * @param resp List
+     * @return List
+     */
     public List followRedirect(List resp) {
         List request=builder.buildBasicRequest(handler.getRedirectedLocation(resp)); 
         List response=handler.getResponse(this.host.getHost(), request, true); 
         return response;
     }
     
+    /**
+     * 
+     * @param stage Integer
+     * @param params Map
+     * @return List
+     */
     public List navigate(int stage, Map params) {
         List request=builder.buildRequest( stage, params);
         List response=handler.getResponse(this.host.getHost(), request, true);
         return response;
     }
     
+    /**
+     * 
+     * @param location String
+     * @return List
+     */
     public List basicRequest(String location) {
         List request=builder.buildBasicRequest(location); 
         List response=handler.getResponse(this.host.getHost(), request, false); 
         return response;
     }
     
+    /**
+     * 
+     * @param location List
+     * @param postdata Map
+     * @return List
+     */
     public List basicPost(String location, Map postdata) {
         List request=builder.buildBasicPost(location, postdata);
         List response=handler.getResponse(this.host.getHost(), request, true);

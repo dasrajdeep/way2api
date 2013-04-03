@@ -6,6 +6,7 @@ import java.util.*;
 /**
  * 
  * @author Rajdeep Das
+ * @version 1.0
  */
 public class RequestBuilder {
     
@@ -36,10 +37,19 @@ public class RequestBuilder {
     
     public String getHeader(String header) {return (String)this.headers.get(header);}
     
+    /**
+     * 
+     * @param header String
+     * @param value String
+     */
     public void addHeader(String header, String value) {
         this.headers.put(header, value);
     }
     
+    /**
+     *  
+     * @param header String
+     */
     public void removeHeader(String header) {
         this.headers.remove(header);
     }
@@ -50,6 +60,12 @@ public class RequestBuilder {
     
     public String getToken() {return this.token;}
     
+    /**
+     * 
+     * @param index Integer
+     * @param params Map
+     * @return List
+     */
     public List buildRequest(int index,Map params) {
         ArrayList<String> request=new ArrayList();
         Set keys=params.keySet();
@@ -77,6 +93,11 @@ public class RequestBuilder {
         return request;
     }
     
+    /**
+     * 
+     * @param location String
+     * @return List
+     */
     public List buildBasicRequest(String location) {
         ArrayList<String> request=new ArrayList();
         Scanner in=new Scanner(this.getClass().getResourceAsStream(this.resourcePath+this.filePrefix+"basic"));
@@ -108,6 +129,12 @@ public class RequestBuilder {
         return request;
     }
     
+    /**
+     * 
+     * @param location String
+     * @param postdata Map
+     * @return List
+     */
     public List buildBasicPost(String location, Map postdata) {
         ArrayList<String> request=new ArrayList();
         Scanner in=new Scanner(this.getClass().getResourceAsStream(this.resourcePath+this.filePrefix+"basic"));

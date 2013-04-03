@@ -1,13 +1,20 @@
 package way2api;
 
-import way2api.core.*;
-import java.util.*;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import way2api.core.Account;
+import way2api.core.Navigator;
+import way2api.core.RequestBuilder;
+import way2api.core.ResponseHandler;
 
 /**
  * 
  * @author Rajdeep Das
+ * @version 1.0
  */
 public class Dispatcher {
     
@@ -60,6 +67,10 @@ public class Dispatcher {
     
     public void setAccount(Account acc) {this.account=acc;}
     
+    /**
+     * 
+     * @return Boolean
+     */
     public boolean login() {
         if(this.account==null) return false;
         
@@ -83,6 +94,12 @@ public class Dispatcher {
     
     public boolean logout() {return false;}
     
+    /**
+     * 
+     * @param mobileNumber String
+     * @param message String
+     * @return Boolean
+     */
     public boolean sendMessage(String mobileNumber, String message) {
         if(!navigator.isLoggedIn()) return false;
         if(message.length()>140) return false;
@@ -146,6 +163,12 @@ public class Dispatcher {
         return true;
     }
     
+    /**
+     * 
+     * @param mobileNumber String
+     * @param message String
+     * @return Boolean
+     */
     public boolean sendQuickMessage(String mobileNumber, String message) {
         if(!this.login()) return false;
         if(!this.sendMessage(mobileNumber, message)) return false;
