@@ -92,7 +92,15 @@ public class Dispatcher {
         } else return false;
     }
     
-    public boolean logout() {return false;}
+    /**
+     * 
+     * @return Boolean 
+     */
+    public boolean logout() {
+        builder.addHeader("Referer", navigator.getHost().toExternalForm()+"Main.action?id="+builder.getToken());
+        navigator.basicRequest(navigator.getHost().toExternalForm()+"entry.jsp?h=6WP0NWtKYIcKKIWjX7XIwyppK3gftCXI");
+        return true;
+    }
     
     /**
      * 
