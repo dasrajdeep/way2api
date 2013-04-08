@@ -1,15 +1,13 @@
 package way2api;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import way2api.core.Account;
-import way2api.core.Navigator;
-import way2api.core.RequestBuilder;
-import way2api.core.ResponseHandler;
+import java.util.*;
+import way2api.core.*;
+import way2api.model.Account;
+import way2api.model.Response;
 
 /**
  * 
@@ -20,11 +18,11 @@ public class Dispatcher {
     
     private Account account=null;
     
-    private Navigator navigator=null;
+    private Navigator nav=null;
     
-    private RequestBuilder builder=null;
+    private Properties configuration;
     
-    private ResponseHandler handler=null;
+    private String token=null;
     
     public Dispatcher() {
         this.bootstrap();
@@ -36,58 +34,77 @@ public class Dispatcher {
     }
     
     private void bootstrap() {
-        this.builder=new RequestBuilder();
-        this.handler=new ResponseHandler();
+        Properties props=new Properties();
+        try {
+            InputStream file=this.getClass().getResourceAsStream("/resources/config.properties");
+            props.load(file);
+            this.configuration=props;
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
         
-        this.navigator=new Navigator(this.builder,this.handler);
-        builder.setHost(navigator.getHost().getHost());
+        this.nav=new Navigator(this.configuration);
+    }
+    
+    /**
+     * 
+     * @return successful or not 
+     */
+    public boolean connect() {
+        try {
+            URL url=new URL("http://www.way2sms.com/");
+            nav.setCurrentDomain(url);
+        } catch(IOException e) {
+            e.printStackTrace();
+            return false;
+        }
         
-        List basic=this.navigator.basicRequest(navigator.getHost().toExternalForm()); 
-        if(handler.isRedirect(basic)) {
-            
-            String location=handler.getRedirectedLocation(basic);
-            builder.addHeader("Referer", location);
+        Response response=nav.get("", null);
+        
+        if(response.isRedirect()) {
+            String loc=response.getHeaderValue("Location");
             
             try {
-                URL url=new URL(location);
-                navigator.setHost(url);
-                builder.setHost(url.getHost());
-            } catch(Exception e) {
+                URL url=new URL(loc);
+                nav.setCurrentDomain(url);
+            } catch(IOException e) {
                 e.printStackTrace();
             }
             
-            List redirect=navigator.basicRequest(location+"content/prehome.jsp");
-            String cookie=handler.extractCookie(redirect); 
-            builder.addHeader("Cookie", cookie);
+            nav.setReferer(loc);
+            response=nav.get("content/prehome.jsp", null);
+            nav.setCookies(response.getCookies());
             
-        }
+            return true;
+        } else return false;
     }
-    
-    public Account getAccount() {return this.account;}
-    
-    public void setAccount(Account acc) {this.account=acc;}
     
     /**
      * 
      * @return Boolean
      */
     public boolean login() {
-        if(this.account==null) return false;
-        
-        builder.addHeader("Referer", navigator.getHost().toExternalForm()+"content/index.html");
+        if(this.getAccount()==null) return false;
         
         Map post=new HashMap<String,String>();
-        post.put("username", this.account.getUserName());
-        post.put("password", this.account.getPassword());
+        post.put("username", this.getAccount().getUserName());
+        post.put("password", this.getAccount().getPassword());
         post.put("userLogin", "no");
         post.put("button", "Login");
         
-        List result=navigator.basicPost(navigator.getHost().toExternalForm()+"w2sauth.action", post);
-        if(handler.isRedirect(result)) {
-            String token=handler.extractToken(result); 
-            builder.setToken(token);
-            navigator.followRedirect(result); 
-            navigator.setLoggedIn(true);
+        nav.setReferer(nav.getCurrentDomain().toExternalForm()+"content/index.html");
+        Response response=nav.post("w2sauth.action", post, false);
+        
+        if(response.isRedirect()) {
+            String loc=response.getHeaderValue("Location"); 
+            try {
+                URL url=new URL(loc);
+                this.token=url.getQuery().substring(3);
+                nav.get(url.getPath(), null);
+            } catch(IOException e) {
+                e.printStackTrace();
+                return false;
+            }
             return true;
         } else return false;
     }
@@ -97,8 +114,13 @@ public class Dispatcher {
      * @return Boolean 
      */
     public boolean logout() {
-        builder.addHeader("Referer", navigator.getHost().toExternalForm()+"Main.action?id="+builder.getToken());
-        navigator.basicRequest(navigator.getHost().toExternalForm()+"entry.jsp?h=6WP0NWtKYIcKKIWjX7XIwyppK3gftCXI");
+        nav.setReferer(nav.getCurrentDomain().toExternalForm()+"Main.action?id="+this.token);
+        
+        Map params=new HashMap();
+        params.put("h", "6WP0NWtKYIcKKIWjX7XIwyppK3gftCXI");
+        
+        nav.get("entry.jsp", params);
+        
         return true;
     }
     
@@ -109,17 +131,17 @@ public class Dispatcher {
      * @return Boolean
      */
     public boolean sendMessage(String mobileNumber, String message) {
-        if(!navigator.isLoggedIn()) return false;
         if(message.length()>140) return false;
         
-        builder.addHeader("Referer", navigator.getHost().toExternalForm()+"Main.action?id="+builder.getToken());
-        List sms=navigator.basicRequest(navigator.getHost().toExternalForm()+"jsp/SingleSMS.jsp?Token="+builder.getToken());
+        Map params=new HashMap();
+        params.put("Token", this.token);
         
-        builder.addHeader("Referer", navigator.getHost().toExternalForm()+"jsp/SingleSMS.jsp?Token="+builder.getToken());
+        nav.setReferer(nav.getCurrentDomain().toExternalForm()+"Main.action?id="+this.token);
+        Response response=nav.get("jsp/SingleSMS.jsp", params);
         
-        String m_15_b=this.findHtml(sms,"m_15_b");
-        String t_15_k_5=this.findHtml(sms, "t_15_k_5");
-        String diffNo=this.findHtml(sms, "diffNo");
+        String m_15_b=this.findHtml(response.getResponseData(),"m_15_b");
+        String t_15_k_5=this.findHtml(response.getResponseData(), "t_15_k_5");
+        String diffNo=this.findHtml(response.getResponseData(), "diffNo");
         
         try {
             message=URLEncoder.encode(message, "utf-8");
@@ -129,7 +151,7 @@ public class Dispatcher {
         }
         
         String nonce=".setAttribute(\"name\",";
-        for(Iterator i=sms.iterator();i.hasNext();) {
+        for(Iterator i=response.getResponseData().iterator();i.hasNext();) {
             String line=(String)i.next();
             if(line.indexOf(nonce)>0) {
                 line=line.substring(line.indexOf(nonce)+nonce.length(), line.indexOf(')')).trim();
@@ -139,7 +161,7 @@ public class Dispatcher {
         }
         
         String cookie="setCookie(\"";
-        for(Iterator i=sms.iterator();i.hasNext();) {
+        for(Iterator i=response.getResponseData().iterator();i.hasNext();) {
             String line=(String)i.next();
             int index=line.indexOf(cookie);
             if(index>0) {
@@ -149,26 +171,36 @@ public class Dispatcher {
             }
         }
         
-        if(!cookie.isEmpty()) builder.addHeader("Cookie", builder.getHeader("Cookie")+"; "+cookie+"="+cookie);
+        if(!cookie.isEmpty()) nav.addCookie(cookie+"="+cookie);
         
         Map post=new HashMap<String,String>();
         post.put("m_15_b", m_15_b);
         post.put(m_15_b, mobileNumber);
         post.put("t_15_k_5", t_15_k_5);
-        post.put(t_15_k_5, builder.getToken());
+        post.put(t_15_k_5, this.token);
         post.put("i_m", "sndsms");
         post.put("txtLen", 140-message.length());
         post.put("textArea", message);
-        post.put("kriya", this.findHtml(sms, "kriya"));
+        post.put("kriya", this.findHtml(response.getResponseData(), "kriya"));
         post.put("chkall", "on");
         post.put("diffNo", diffNo);
         post.put(nonce, "");
         post.put("catnamedis", "Birthday");
         
-        List sent=navigator.basicPost(navigator.getHost().toExternalForm()+"jsp/m2msms.action", post); 
-        if(handler.isRedirect(sent)) navigator.followRedirect(sent);
-        
-        return true;
+        nav.setReferer(nav.getCurrentDomain().toExternalForm()+"jsp/SingleSMS.jsp?Token="+this.token);
+        response=nav.post("jsp/m2msms.action", post, false);
+        if(response.isRedirect()) {
+            String loc=response.getHeaderValue("Location");
+            try {
+                URL url=new URL(loc);
+                nav.setCurrentDomain(url);
+                nav.get(url.getPath(), null);
+                return true;
+            } catch(IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else return false;
     }
     
     /**
@@ -208,15 +240,19 @@ public class Dispatcher {
         
         return value;
     }
-    
-    private void dump(List data) {
-        for(Iterator i=data.iterator();i.hasNext();) System.out.println(i.next());
-        System.out.println();
+
+    /**
+     * @return the account
+     */
+    public Account getAccount() {
+        return account;
     }
-    
-    private void dump(String data) {
-        System.out.println(data);
-        System.out.println();
+
+    /**
+     * @param account the account to set
+     */
+    public void setAccount(Account account) {
+        this.account = account;
     }
     
 }
