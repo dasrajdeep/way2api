@@ -99,8 +99,10 @@ public class Dispatcher {
             String loc=response.getHeaderValue("Location"); 
             try {
                 URL url=new URL(loc);
-                this.token=url.getQuery().substring(3);
-                nav.get(url.getPath(), null);
+                this.token=url.getQuery().substring(3); 
+                Map params=new HashMap();
+                params.put("id", url.getQuery().substring(3));
+                nav.get(url.getPath(), params);
             } catch(IOException e) {
                 e.printStackTrace();
                 return false;
@@ -117,9 +119,9 @@ public class Dispatcher {
         nav.setReferer(nav.getCurrentDomain().toExternalForm()+"Main.action?id="+this.token);
         
         Map params=new HashMap();
-        params.put("h", "6WP0NWtKYIcKKIWjX7XIwyppK3gftCXI");
+        params.put("folder", "inbox");
         
-        nav.get("entry.jsp", params);
+        nav.get("LogOut", params);
         
         return true;
     }
@@ -171,7 +173,8 @@ public class Dispatcher {
             }
         }
         
-        if(!cookie.isEmpty()) nav.addCookie(cookie+"="+cookie);
+        //if(!cookie.isEmpty()) nav.addCookie(cookie+"="+cookie);
+        nav.addCookie("12489smssending34908=67547valdsvsikerexzc435457");
         
         Map post=new HashMap<String,String>();
         post.put("m_15_b", m_15_b);
@@ -188,7 +191,7 @@ public class Dispatcher {
         post.put("catnamedis", "Birthday");
         
         nav.setReferer(nav.getCurrentDomain().toExternalForm()+"jsp/SingleSMS.jsp?Token="+this.token);
-        response=nav.post("jsp/m2msms.action", post, false);
+        response=nav.post("jsp/sndsms2usr.action", post, false);
         if(response.isRedirect()) {
             String loc=response.getHeaderValue("Location");
             try {

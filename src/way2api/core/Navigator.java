@@ -72,6 +72,8 @@ public class Navigator {
      * @return response
      */
     public Response get(String resource, Map parameters) {
+        if(resource.startsWith("/")) resource=resource.substring(1);
+        
         Request req=new Request(this.config);
         
         req.setMethod(Method.GET);
@@ -105,6 +107,7 @@ public class Navigator {
         req.setResourcePath(resource);
         req.setParameters(parameters);
         req.setMultipart(multipart);
+        req.addHeader("Content-Type", "application/x-www-form-urlencoded");
         
         if(this.getReferer()!=null) req.addHeader("Referer", getReferer());
         if(this.getCookies()!=null) req.addHeader("Cookie", getCookies());
