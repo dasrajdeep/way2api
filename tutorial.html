@@ -81,6 +81,7 @@
 					To send multiple messages, you need to call the method login() on the dispatcher, and then send the messages by invoking the method sendMessage() for each text message, eventually followed by calling logout() on the dispatcher.
 					<br/>
 					<code>
+							dispatcher.connect();<br/>
 						    dispatcher.login();<br/>
 							dispatcher.sendMessage("9876543210","this is a message");<br/>
 							dispatcher.logout();
