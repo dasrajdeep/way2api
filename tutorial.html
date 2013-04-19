@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Way2API by dasrajdeep</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Way2API</h1>
+          <h2>Way2SMS API for Java.</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="index.html" id="view-on-github" class="button"><span>Home</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Way2API Tutorial</h1>
+
+			<p style="text-align: justify">
+				In order to get a brief idea of what the Way2API is, please read the <a href="index.html">introduction</a> on this software. To get started with, you need a Java project to use Way2API. Follow the steps given below to send a text message using this API: 
+			</p>
+			<ol>
+				<li>Add the jar file(way2api.jar) to the classpath of the project or as a library using any IDE such as Netbeans and Eclipse.</li>
+				<li>
+					Withing the source file where you want to use Way2API, you need to import two classes - Account and Dispatcher. These classes can be imported using the statements
+					<br/>
+					<code>
+						import way2api.core.Account;
+						<br/>
+						import way2api.Dispatcher;
+					</code>
+				</li>
+				<li>
+					In your source code, you must first create an account corresponding to the Way2SMS account, you wish to use for sending text messages. To do so, create an object of the Account class with the username and password as the first and second parameters. You can also create an empty object and set the account with the methods setUsername() and setPassword().
+					<br/>
+					<code>
+						Account account=new Account("username","password");
+					</code>
+					<br/>
+					or,
+					<br/>
+					<code>
+						Account account=new Account();<br/>
+						account.setUsername("username");<br/>
+						account.setPassword("password");
+					</code>
+				</li>
+				<li>
+					You then need to create an object of the Dispatcher class, optionally specifying the account object as a parameter. You may add the account object later on using the method setAccount().
+					<br/>
+					<code>Dispatcher dispatcher=new Dispatcher(account);</code>
+					<br/>
+					or,
+					<br/>
+					<code>
+						Dispatcher dispatcher=new Dispatcher();<br/>
+						dispatcher.setAccount(account);
+					</code>
+				</li>
+				<li>
+					To send a SMS, you may choose one of the two procedures: login-sendmessage-logout or sendquickmessage. To send multiple texts, it is recommended to use the former procedure. To send a quick message, you need to call the Dispatcher method sendQuickMessage() with the parameters, mobile_number and text.
+					<br/>
+					<code>dispatcher.sendQuickMessage("9876543210","this is a message");</code>
+				</li>
+				<li>
+					To send multiple messages, you need to call the method login() on the dispatcher, and then send the messages by invoking the method sendMessage() for each text message, eventually followed by calling logout() on the dispatcher.
+					<br/>
+					<code>
+						    dispatcher.login();<br/>
+							dispatcher.sendMessage("9876543210","this is a message");<br/>
+							dispatcher.logout();
+					</code>
+				</li>
+			</ol>
+        </section>
+
+        <footer>
+          Way2API is maintained by <a href="https://github.com/dasrajdeep">dasrajdeep</a><br>
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
